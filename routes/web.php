@@ -59,4 +59,5 @@ Route::middleware('admin')->prefix('admin')->group(function () {
 
     Route::get('/cars', [CarController::class, 'index'])->name('admin.cars.index');
     Route::put('/cars/bulk-update', [CarController::class, 'bulkUpdate'])->name('admin.cars.bulk-update');
+    Route::post('/cars', [CarController::class, 'store'])->name('admin.cars.store');
 });
