@@ -136,4 +136,26 @@ class CarControllerTest extends TestCase
 
         $response->assertSessionHasErrors(['key', 'name', 'fee', 'sort_order']);
     }
+
+    public function test_destroy_deletes_car_and_image(): void
+    {
+        Storage::fake('public');
+        $path = UploadedFile::fake()->image('car.png')->store('cars', 'public');
+        $car = Car::factory()->create(['image' => $path]);
+
+        $this->actingAs($this->admin(), 'admin')
+            ->delete(route('admin.cars.destroy', $car))
+            ->assertRedirect(route('admin.cars.index'))
+            ->assertSessionHas('success');
+
+        $this->assertNull(Car::find($car->id));
+        Storage::disk('public')->assertMissing($path);
+    }
+
+    public function test_guests_cannot_delete_cars(): void
+    {
+        $car = Car::factory()->create();
+
+        $this->delete(route('admin.cars.destroy', $car))->assertForbidden();
+    }
 }

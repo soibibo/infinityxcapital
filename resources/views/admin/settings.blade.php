@@ -89,7 +89,7 @@
                       type="text"
                       name="methods[{{ $key }}][wallet_address]"
                       form="settings-form"
-                      value="{{ old("methods.{$key}.wallet_address", $method['wallet_address']) }}"
+                      value="{{ old("methods.{$key}.wallet_address", $method['wallet_address'] ?? '') }}"
                       class="w-full border border-gray-300 px-4 py-2.5 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
                     />
                     @error("methods.{$key}.wallet_address")
@@ -103,7 +103,7 @@
                       type="text"
                       name="methods[{{ $key }}][minimum_deposit]"
                       form="settings-form"
-                      value="{{ old("methods.{$key}.minimum_deposit", $method['minimum_deposit']) }}"
+                      value="{{ old("methods.{$key}.minimum_deposit", $method['minimum_deposit'] ?? '') }}"
                       class="w-full border border-gray-300 px-4 py-2.5 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
                     />
                     @error("methods.{$key}.minimum_deposit")
@@ -118,7 +118,7 @@
                       form="settings-form"
                       rows="3"
                       class="w-full border border-gray-300 px-4 py-2.5 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
-                    >{{ old("methods.{$key}.instructions", $method['instructions']) }}</textarea>
+                    >{{ old("methods.{$key}.instructions", $method['instructions'] ?? '') }}</textarea>
                   </div>
 
                   @if($key !== 'paypal')

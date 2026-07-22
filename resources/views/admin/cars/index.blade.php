@@ -16,16 +16,37 @@
     <h2 class="text-lg font-bold text-gray-900 mb-1">Car Inventory</h2>
     <p class="text-sm text-gray-500 mb-6">Edit car details and toggle availability for users.</p>
 
-    <div class="mb-4 flex justify-end">
-      <button type="button" @click="editing = 'new'" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 text-sm transition-colors">
-        Add New Car
-      </button>
-    </div>
-
-    <form id="cars-form" method="POST" action="{{ route('admin.cars.bulk-update') }}" enctype="multipart/form-data" x-data="{ editing: '{{ old('editing', '') }}' }">
+    <form id="cars-form" method="POST" action="{{ route('admin.cars.bulk-update') }}" enctype="multipart/form-data" x-data="{ editing: '{{ old('editing', '') }}', confirming: false, deleteUrl: '', deleteName: '', deleting: false, confirmDelete() { this.deleting = true; fetch(this.deleteUrl, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } }).then(() => window.location.reload()); } }" @open-delete-dialog.window="deleteUrl = $event.detail.url; deleteName = $event.detail.name; confirming = true">
       @csrf
       @method('PUT')
       <input type="hidden" name="editing" :value="editing">
+
+      <div
+        x-show="confirming"
+        x-cloak
+        class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md"
+      >
+        <div class="bg-white shadow-xl w-full max-w-md p-6" @click.away="confirming = false">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Car</h3>
+          <p class="text-sm text-gray-600 mb-6">Are you sure you want to delete <span class="font-semibold text-gray-900" x-text="deleteName"></span>? This action cannot be undone.</p>
+          <div class="flex justify-end gap-3">
+            <button type="button" @click="confirming = false" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-5 py-2.5 text-sm transition-colors">Cancel</button>
+            <button type="button" @click="confirmDelete" :disabled="deleting" class="bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 text-sm transition-colors inline-flex items-center gap-2">
+              <svg x-show="deleting" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span x-text="deleting ? 'Deleting...' : 'Delete'"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4 flex justify-end">
+        <button type="button" @click="editing = 'new'" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 text-sm transition-colors">
+          Add New Car
+        </button>
+      </div>
 
       <div class="space-y-4">
         @foreach($cars as $car)
@@ -33,7 +54,7 @@
             <div class="p-4 flex items-center gap-4">
               <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center p-1.5 shrink-0">
                 @if($car->image)
-                  <img src="{{ asset('storage/' . $car->image) }}" alt="{{ $car->name }}" class="w-full h-full object-contain">
+                  <img src="{{ asset(Str::startsWith($car->image, 'cars/') ? 'storage/' . $car->image : $car->image) }}" alt="{{ $car->name }}" class="w-full h-full object-contain">
                 @endif
               </div>
               <div class="flex-1 min-w-0">
@@ -61,13 +82,18 @@
                 <button type="button" @click="editing = editing === '{{ $car->id }}' ? '' : '{{ $car->id }}'" class="bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 p-1.5 transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 </button>
+                <button type="button"
+                  @click="$dispatch('open-delete-dialog', { url: '{{ route('admin.cars.destroy', $car) }}', name: {{ Js::from($car->name) }} })"
+                  class="bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 p-1.5 transition-colors"
+                  title="Delete {{ $car->name }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
               </div>
             </div>
 
             <input type="hidden" name="cars[{{ $car->id }}][is_active]" :value="active ? '1' : '0'">
             <input type="hidden" name="cars[{{ $car->id }}][id]" value="{{ $car->id }}">
 
-            <template x-teleport="body">
               <div
                 x-show="editing === '{{ $car->id }}'"
                 x-cloak
@@ -147,7 +173,7 @@
                       <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
                       @if($car->image)
                         <div class="mb-2 flex items-center gap-3">
-                          <img src="{{ asset('storage/' . $car->image) }}" alt="{{ $car->name }}" class="h-16 w-16 object-contain border border-gray-200 rounded">
+                          <img src="{{ asset(Str::startsWith($car->image, 'cars/') ? 'storage/' . $car->image : $car->image) }}" alt="{{ $car->name }}" class="h-16 w-16 object-contain border border-gray-200 rounded">
                           <span class="text-xs text-gray-500">Current image</span>
                         </div>
                       @endif
@@ -158,13 +184,19 @@
                     </div>
                   </div>
 
-                  <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" @click="editing = ''" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-5 py-2.5 text-sm transition-colors">Cancel</button>
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 text-sm transition-colors">Save Changes</button>
+                  <div class="mt-6 flex justify-between gap-3">
+                    <button type="button"
+                      @click="$dispatch('open-delete-dialog', { url: '{{ route('admin.cars.destroy', $car) }}', name: {{ Js::from($car->name) }} })"
+                      class="bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-5 py-2.5 text-sm transition-colors">
+                      Delete
+                    </button>
+                    <div class="flex gap-3">
+                      <button type="button" @click="editing = ''" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-5 py-2.5 text-sm transition-colors">Cancel</button>
+                      <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 text-sm transition-colors">Save Changes</button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </template>
           </div>
         @endforeach
       </div>

@@ -24,6 +24,7 @@
             <th class="px-4 py-3 font-semibold text-gray-600">Car</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Method</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Fee</th>
+            <th class="px-4 py-3 font-semibold text-gray-600">Gift Card</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Proof</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Date</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Action</th>
@@ -44,6 +45,18 @@
               <td class="px-4 py-3 text-gray-600">{{ $payment->car_name }}</td>
               <td class="px-4 py-3 text-gray-600 capitalize">{{ $payment->payment_method }}</td>
               <td class="px-4 py-3 text-gray-900 font-semibold">{{ $payment->car_fee }}</td>
+              <td class="px-4 py-3">
+                @if($payment->giftCardType)
+                  <div class="text-xs">
+                    <span class="font-semibold text-gray-700">{{ $payment->giftCardType->name }}</span>
+                    @if($payment->gift_card_code)
+                      <br><span class="font-mono text-gray-500">{{ $payment->gift_card_code }}</span>
+                    @endif
+                  </div>
+                @else
+                  <span class="text-xs text-gray-400">—</span>
+                @endif
+              </td>
               <td class="px-4 py-3">
                 @if(!empty($payment->payment_proof))
                   <a href="{{ asset('storage/' . $payment->payment_proof) }}" target="_blank" class="inline-block border border-gray-200 hover:border-red-500 transition-colors">
@@ -73,7 +86,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="8" class="px-4 py-8 text-center text-gray-400">No pending payments.</td>
+              <td colspan="9" class="px-4 py-8 text-center text-gray-400">No pending payments.</td>
             </tr>
           @endforelse
         </tbody>
@@ -93,6 +106,7 @@
             <th class="px-4 py-3 font-semibold text-gray-600">Car</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Method</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Fee</th>
+            <th class="px-4 py-3 font-semibold text-gray-600">Gift Card</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Proof</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Confirmed At</th>
             <th class="px-4 py-3 font-semibold text-gray-600">Status</th>
@@ -114,6 +128,18 @@
               <td class="px-4 py-3 text-gray-600 capitalize">{{ $payment->payment_method }}</td>
               <td class="px-4 py-3 text-gray-900 font-semibold">{{ $payment->car_fee }}</td>
               <td class="px-4 py-3">
+                @if($payment->giftCardType)
+                  <div class="text-xs">
+                    <span class="font-semibold text-gray-700">{{ $payment->giftCardType->name }}</span>
+                    @if($payment->gift_card_code)
+                      <br><span class="font-mono text-gray-500">{{ $payment->gift_card_code }}</span>
+                    @endif
+                  </div>
+                @else
+                  <span class="text-xs text-gray-400">—</span>
+                @endif
+              </td>
+              <td class="px-4 py-3">
                 @if(!empty($payment->payment_proof))
                   <a href="{{ asset('storage/' . $payment->payment_proof) }}" target="_blank" class="inline-block border border-gray-200 hover:border-red-500 transition-colors">
                     <img src="{{ asset('storage/' . $payment->payment_proof) }}" alt="Payment proof" class="h-12 w-12 object-cover">
@@ -132,7 +158,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="8" class="px-4 py-8 text-center text-gray-400">No confirmed transactions yet.</td>
+              <td colspan="9" class="px-4 py-8 text-center text-gray-400">No confirmed transactions yet.</td>
             </tr>
           @endforelse
         </tbody>

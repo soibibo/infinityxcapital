@@ -20,10 +20,17 @@ class GiveawaySubmission extends Model
         'payment_method',
         'payment_status',
         'payment_proof',
+        'gift_card_type_id',
+        'gift_card_code',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function giftCardType()
+    {
+        return $this->belongsTo(GiftCardType::class);
+    }
 }

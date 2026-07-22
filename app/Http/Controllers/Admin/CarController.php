@@ -92,4 +92,16 @@ class CarController extends Controller
         return redirect()->route('admin.cars.index')
             ->with('success', 'Car created successfully.');
     }
+
+    public function destroy(Car $car): RedirectResponse
+    {
+        if ($car->image && Storage::disk('public')->exists($car->image)) {
+            Storage::disk('public')->delete($car->image);
+        }
+
+        $car->delete();
+
+        return redirect()->route('admin.cars.index')
+            ->with('success', 'Car deleted successfully.');
+    }
 }

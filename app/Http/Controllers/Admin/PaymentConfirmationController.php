@@ -29,6 +29,13 @@ class PaymentConfirmationController extends Controller
     {
         $submission->update(['payment_status' => 'confirmed']);
 
+        if ($submission->gift_card_id && $submission->gift_card_discount > 0) {
+            $giftCard = $submission->giftCard;
+            if ($giftCard) {
+                $giftCard->increment('used_balance', $submission->gift_card_discount);
+            }
+        }
+
         return redirect()->route('admin.payments')->with('success', 'Payment confirmed successfully.');
     }
 

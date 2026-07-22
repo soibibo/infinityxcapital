@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\CarController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\GiftCardTypeController;
 use App\Http\Controllers\Admin\PaymentConfirmationController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
@@ -57,7 +58,13 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     Route::post('/payments/{submission}/confirm', [PaymentConfirmationController::class, 'confirm'])->name('admin.payments.confirm');
     Route::post('/payments/{submission}/reject', [PaymentConfirmationController::class, 'reject'])->name('admin.payments.reject');
 
+    Route::get('/gift-card-types', [GiftCardTypeController::class, 'index'])->name('admin.gift-card-types');
+    Route::post('/gift-card-types', [GiftCardTypeController::class, 'store'])->name('admin.gift-card-types.store');
+    Route::put('/gift-card-types/{giftCardType}', [GiftCardTypeController::class, 'update'])->name('admin.gift-card-types.update');
+    Route::delete('/gift-card-types/{giftCardType}', [GiftCardTypeController::class, 'destroy'])->name('admin.gift-card-types.destroy');
+
     Route::get('/cars', [CarController::class, 'index'])->name('admin.cars.index');
     Route::put('/cars/bulk-update', [CarController::class, 'bulkUpdate'])->name('admin.cars.bulk-update');
     Route::post('/cars', [CarController::class, 'store'])->name('admin.cars.store');
+    Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('admin.cars.destroy');
 });
