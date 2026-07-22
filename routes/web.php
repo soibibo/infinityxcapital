@@ -18,7 +18,7 @@ Route::get('/', function () {
         ->get();
 
     return view('home', compact('cars'));
-});
+})->name('home');
 
 Route::get('/participate', function () {
     return view('participate');
