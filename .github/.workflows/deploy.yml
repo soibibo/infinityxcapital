@@ -1,0 +1,52 @@
+name: Deploy Laravel via FTP
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Install Composer dependencies (production only)
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Cache Laravel config/routes (optional, speeds up prod)
+        run: |
+          php artisan config:cache || true
+          php artisan route:cache || true
+          php artisan view:cache || true
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: /public_html/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            **/.env
+            **/storage/logs/**
