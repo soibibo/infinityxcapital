@@ -1,4 +1,4 @@
-name: Deploy Laravel via FTP active
+name: Deploy Laravel via FTP 
 
 on:
   push:
